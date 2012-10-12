@@ -65,6 +65,15 @@ At PayPerks Inc. we use this script to backup from our production MongoDB cluste
 ##History
 * Originally created by Alex Hewson (alex@payperks.com)
 
+<table>
+  <tr>
+    <th>Version</th><th>Date</th><th>Notes</th>
+  </tr>
+  <tr>
+    <td>0.01</td><td>2012-10-12</td><td>First release</td>
+  </tr>
+</table>
+
 
 ##License
 Copyright 2012 PayPerks, Inc.

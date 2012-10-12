@@ -1,7 +1,7 @@
-#!/usr/bin/env bash -e
+#!/usr/bin/bash -e
 
 
-# mongolvmbackup v0.02
+# mongolvmbackup v0.03
 
 
 #

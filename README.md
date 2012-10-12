@@ -6,7 +6,9 @@ mongolvmbackup
 
 
 ##History
-* Originally created by Alex Hewson (alex@payperks.com)
+Originally created by Alex Hewson for use at PayPerks
+* Email: (alex@payperks.com)
+* Github: https://github.com/alexmbird
 
 ##License
 Copyright 2012 PayPerks, Inc.

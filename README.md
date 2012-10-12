@@ -76,7 +76,7 @@ At PayPerks Inc. we use this script to backup from our production MongoDB cluste
     <td>0.02</td><td>2012-10-12</td><td>Minor fixes</td>
   </tr>
   <tr>
-    <td>0.03</td><td>2012-10-12</td><td>Abandon [futile](https://forums.aws.amazon.com/message.jspa?messageID=254579) attempt at path-independence</td>
+    <td>0.03</td><td>2012-10-12</td><td>Abandon <a href='https://forums.aws.amazon.com/message.jspa?messageID=254579'>futile</a> attempt at path-independence</td>
   </tr>
 </table>
 

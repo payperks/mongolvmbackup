@@ -60,7 +60,7 @@ print_help() {
   echo "$0: -g <lvmgroup> -v <lvmvolume> -b <s3 bucket>"
   echo
   echo "Snapshot & compress MongoDB databases present on this host.  Place them in"
-  echo "$TARGET_DIR and optionally upload to an Amazon S3 bucket."
+  echo "$TARGET_DIR and create a 'latest' symlink."
   echo
   exit 0
 }

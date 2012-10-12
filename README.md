@@ -39,8 +39,9 @@ By default mongolvmbackup uses bzip2: it's available on almost all Linux systems
 On all but the slowest hosts mongolvmbackup will be bound by the read speed of your mongodb data volume.  It'll help if your target (where you're writing the compressed backup) is not on the same physical disk or Amazon EBS volume.
 
 ### Backup from a Slave
-Although MongoDB is only locked against writes for a couple of seconds its performance on this host will take a hit while mongolvmbackup is reading and compressing the snapshot.  You may find this results in performance too slow for production.  In this case try:
-* Setting up a small, dedicated host for backups in a replicaset and running mongolvmbackup on /that/ so your master is unaffected.  Make sure that this replica is 'hidden' and has a priority of 0 so no production queries will be directed to it.
+Although MongoDB is only locked against writes for a couple of seconds its performance on this host will take a hit while mongolvmbackup is reading and compressing the snapshot.  You may find it results in performance too slow for production.  
+
+In this case try setting up a dedicated host for backups in a replicaset and running mongolvmbackup on /that/ so your master is unaffected.  Make sure that this replica is 'hidden' and has a priority of 0 so no production queries will be directed to it.
 
 
 ## Successes

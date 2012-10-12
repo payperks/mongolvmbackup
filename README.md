@@ -71,6 +71,7 @@ At PayPerks Inc. we use this script to backup from our production MongoDB cluste
   </tr>
   <tr>
     <td>0.01</td><td>2012-10-12</td><td>First release</td>
+    <td>0.02</td><td>2012-10-12</td><td>Minor fixes</td>
   </tr>
 </table>
 

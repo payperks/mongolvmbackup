@@ -1,4 +1,4 @@
-#!/usr/bin/bash -e
+#!/bin/bash -e
 
 
 # mongolvmbackup v0.03

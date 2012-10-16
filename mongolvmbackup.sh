@@ -170,6 +170,7 @@ tar cv * | $COMPRESS_PROG "-${COMPRESS_LEVEL}" -c > "${TARGET_DIR}/${targetfile}
 echo
 cd -
 cd "$TARGET_DIR"
+rm -vf latest.${COMPRESS_SUFFIX}
 ln -v -s ${targetfile} latest.${COMPRESS_SUFFIX}
 cd -
 

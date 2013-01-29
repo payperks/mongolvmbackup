@@ -63,7 +63,7 @@ At PayPerks Inc. we use this script to backup from our production MongoDB cluste
 
 
 ##History
-* Originally created by Alex Hewson (alex@payperks.com)
+* Originally created by Alex Hewson (alex@payperks.com, https://github.com/alexmbird)
 
 <table>
   <tr>

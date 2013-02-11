@@ -125,7 +125,7 @@ fi
 
 
 # Figure out where to put it
-date=`date --rfc-3339=date`
+date=`date +%F_%R`
 targetfile="${volume}-${date}-snap.${COMPRESS_SUFFIX}"
 
 

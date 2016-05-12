@@ -1,15 +1,15 @@
 #!/bin/bash -e
 
 
-# mongolvmbackup v0.03
+# mongolvmbackup v0.04
 #
 # Backup the local MongoDB database by:
 #
-#  1)   fsync+lock mongodb
+#  1)   fsync+lock mongodb only if mdb version is less than 3.2.0
 #  2)   lvm snapshot mongodb's data volume
-#  3)   unlock mongodb
-#  4)   bzip2 the snapshot into tempdir
-#  4.1) symlink 'latest.tbz2' to the snapshot we just took
+#  3)   unlock mongodb only if mdb version is less than 3.2.0
+#  4)   gzip the snapshot into tempdir
+#  4.1) symlink 'latest.tgz' to the snapshot we just took
 #  5)   destroy snapshot
 #
 
@@ -47,7 +47,7 @@
 #    CONFIGURATION SECTION
 
 # Where compressed backup will be temporarily staged for transmission to S3
-TARGET_DIR=/mnt/mongosnaps
+TARGET_DIR=/opt/backup
 
 
 # How long to keep backups around on local storage.  This is ephemeral so must
@@ -56,16 +56,25 @@ TARGET_DIR=/mnt/mongosnaps
 LOCAL_RETENTION_DAYS=7
 
 # Compression program & level.  Tweak this to get better/faster compression.
-COMPRESS_PROG=bzip2
-COMPRESS_SUFFIX=tbz2
+COMPRESS_PROG=gzip
+COMPRESS_SUFFIX=tgz
 COMPRESS_LEVEL=6
+
+# Username to access the mongo server e.g. dbuser
+# Unnecessary if authentication is off
+# DBUSERNAME=""
+
+# Password to access the mongo server e.g. password
+# Unnecessary if authentication is off
+# DBPASSWORD=""
+
+# Database for authentication to the mongo server e.g. admin
+# Unnecessary if authentication is off
+# DBAUTHDB=""
 
 
 #    END CONFIG SECTION
 # =============================================================================
-
-
-
 
 print_help() {
   echo
@@ -77,6 +86,15 @@ print_help() {
   exit 0
 }
 
+# OPTIONS for mongo connection if enabled
+# Do we need to use a username/password?
+OPTION=""
+if [ "$DBUSERNAME" ]; then
+    OPTION="$OPTION --username=$DBUSERNAME --password=$DBPASSWORD"
+    if [ "$DBAUTHDB" ]; then
+        OPTION="$OPTION --authenticationDatabase=$DBAUTHDB"
+    fi
+fi
 
 # Check for some required utilities
 command lvcreate --help >/dev/null 2>&1 || { echo "Error: lvcreate is required.  Cannot continue."; exit 1; }
@@ -128,6 +146,10 @@ fi
 date=`date +%F_%H%M`
 targetfile="${volume}-${date}-snap.${COMPRESS_SUFFIX}"
 
+# Get the MDB version
+MDBVERSION=`mongo --eval "db.version()" | awk 'NR==3' | tr -d "."`
+# Get the MDB engine
+MDBENGINE=`mongo $OPTION --eval "printjson(db.serverStatus().storageEngine)" | grep -oP wiredTiger`
 
 # =============================================================================
 # Print a meaningful banner!
@@ -141,32 +163,55 @@ echo
 
 
 
-# Create target dir if not extant
+# Create target dir if not exist
 if [ ! -d "$TARGET_DIR" ]
 then
   echo "Your target dir ${TARGET_DIR} doesn't exist and I'm too cowardly to create it"
   exit 1
 fi
 
+create_lvsnap() {
+  # Create the snapshot
+  snapvol="$volume-snap"
+  echo "Taking snapshot $snapvol"
+  lvcreate --snapshot "/dev/$vgroup/$volume" --name "$snapvol" -l '80%FREE'
+  echo
+}
+
+# set the mdb version limt above which it isn't required db.fsyncLock
+MDBVERLIMIT="320"
+MDBENGINELIMIT="wiredTiger"
+if [ "$MDBVERLIMIT" -ge "$MDBVERSION" ] && [ "$MDBENGINELIMIT" == "$MDBENGINE" ]; then
+    echo "$MDBVERLIMIT >= $MDBVERSION and the engine is $MDBENGINE so fsyncLock is not required!"
+    # CREATE THE SNAPSHOT
+    create_lvsnap
+else
+    echo "$MDBVERLIMIT < $MDBVERSION and the engine is $MDBENGINE so fsyncLock is required!"
+    echo "Freezing MongoDB before LVM snapshot"
+    mongo $OPTION -eval "printjson(db.fsyncLock())"
+    IsFSYNCLOCKON=`mongo $OPTION -eval "printjson(db.currentOp())" | grep -oP fsyncLock`
+    if [ ! $IsFSYNCLOCKON ]; 
+    then
+      echo "fsyncLock is OFF yet! "
+      exit 1
+    fi
+    
+    # CREATE THE SNAPSHOT
+    create_lvsnap
+    
+    echo "Snapshot OK; unfreezing DB"
+    mongo $OPTION -eval "db.fsyncUnlock()"
+    echo
+    echo    
+fi
 
 
-
-# Create the snapshot
-snapvol="$volume-snap"
-echo "Freezing MongoDB before LVM snapshot"
-mongo -eval "db.fsyncLock()"
-echo
-echo "Taking snapshot $snapvol"
-lvcreate --snapshot "/dev/$vgroup/$volume" --name "$snapvol" --extents '90%FREE'
-echo
-echo "Snapshot OK; unfreezing DB"
-mongo -eval "db.fsyncUnlock()"
-echo
-echo
+# fix bug: lvcreate snapshot mount by uuid as shown on url: http://www.zero-effort.net/tip-of-the-day-mounting-an-xfs-lvm-snapshot/
+xfs_repair -L "/dev/${vgroup}/${snapvol}" >/dev/null 2>&1 
 
 # Mount the snapshot
 mountpoint=`mktemp -t -d mount.mongolvmbackup_XXX`
-mount -v -o ro "/dev/${vgroup}/${snapvol}" "${mountpoint}"
+mount -v -o ro,nouuid "/dev/${vgroup}/${snapvol}" "${mountpoint}"
 echo
 
 # Remove backups older than $LOCAL_RETENTION_DAYS to free up space now.

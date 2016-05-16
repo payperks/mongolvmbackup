@@ -7,7 +7,7 @@ Features:
 * Roughly follows suggestions made in the [MongoDB](http://docs.mongodb.org/manual/administration/backups/) [docs](http://www.mongodb.org/display/DOCS/Backups).
 * Lock MongoDB only briefly while the snapshot is being created.  Usually this takes only a couple of seconds; after that it's business as usual.
 * A symlink to the latest backup is created to aid with restores and help other scripts find your data to send it offsite.
-* Compress with bzip2 by default; other algorithms are supported
+* Compress with gzip by default; other algorithms are supported
 * Remove compressed backups older than N days
 * Works with shards if you run a mongolvmbackup for each shard, but results [may not be consistent](http://www.mongodb.org/display/DOCS/Backing+Up+Sharded+Cluster)
 
@@ -33,7 +33,7 @@ It requires:
 
 ## Tips & Tricks
 ### Faster Compression
-By default mongolvmbackup uses bzip2: it's available on almost all Linux systems and good enough for most needs.  However if you're backing up really big datasets on a modern host with more than one CPU you'll find moving to a parallel compression util makes things a lot faster.  Try pbzip2 or pigz.
+By default mongolvmbackup uses gzip: it's available on almost all Linux systems and good enough for most needs.  However if you're backing up really big datasets on a modern host with more than one CPU you'll find moving to a parallel compression util makes things a lot faster.  Try pbzip2 or pigz.
 
 ### Use Multiple Disks
 On all but the slowest hosts mongolvmbackup will be bound by the read speed of your mongodb data volume.  It'll help if your target (where you're writing the compressed backup) is not on the same physical disk or Amazon EBS volume.
@@ -57,7 +57,6 @@ At PayPerks Inc. we use this script to backup from our production MongoDB cluste
 * More paranoia
  * When creating snapshot
  * Check target FS has enough free space
- * Test db.fsyncLock() really worked
 * Pre & post backup hooks
 * Save in backup some metadata about the host & mongodb config
 

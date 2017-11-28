@@ -77,12 +77,15 @@ At PayPerks Inc. we use this script to backup from our production MongoDB cluste
   <tr>
     <td>0.03</td><td>2012-10-12</td><td>Abandon <a href='https://forums.aws.amazon.com/message.jspa?messageID=254579'>futile</a> attempt at path-independence</td>
   </tr>
+    <tr>
+    <td>0.10</td><td>2016-05-12</td><td>Updates mongolvmbackup.sh by cprato79 including: Workaround for mount the lvm snapshot volume, Changed to gzip as default compression tool, Added login parameters if mongo auth it is enabled, Added check if mongo it has been locked before snapshot when it's requires, Added mongo version check for lock database only when MDB is minor then 3.2.x and the Engine is wiredtiger.</td>
+  </tr>
 </table>
 
 
 ##License
 
-Copyright (c) 2012, PayPerks, Inc.
+Copyright (c) 2012-2017, PayPerks, Inc.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:

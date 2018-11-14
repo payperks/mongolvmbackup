@@ -1,6 +1,8 @@
 mongolvmbackup
 ==============
 
+NOTE: This tool is not maintained anymore.  USE AT YOUR OWN RISK.  Other forks of this code might be more useful.
+
 A tool for backing up your MongoDB datasets with almost no downtime.  It accomplishes this MongoDB's fsync* commands and LVM snapshotting (so requires your DB volume be created in LVM!).
 
 Features:
